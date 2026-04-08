@@ -1,39 +1,35 @@
-from datetime import datetime
 import random
-from groq import Groq
 import os
+from groq import Groq
 from dotenv import load_dotenv
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-def calculator(expression):
 
+# Calculator
+def calculator(expression):
     try:
+        # safer eval (basic protection)
+        allowed_chars = "0123456789+-*/(). "
+        if any(char not in allowed_chars for char in expression):
+            return "Invalid expression"
+
         result = eval(expression)
         return f"Result: {result}"
 
-    except:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": expression}]
-        )
+    except Exception:
+        return "Error in calculation"
 
-        return response.choices[0].message.content
 
+# Weather
 def weather(city):
-
     mock_weather = {
         "mumbai": "30°C, Humid",
         "delhi": "25°C, Clear sky",
         "london": "15°C, Cloudy",
         "new york": "18°C, Windy",
         "nagpur": "40°C, Sunny",
-        "muscat": "24°C, Rainy",
-        "dubai": "34°C, Cloudy",
-        "washington": "2°C, Hailstorm", 
-        "florida": "12°C, Thunderstorm",
-        "tel-aviv": "34°C, Sunny"
     }
 
     city = city.lower()
@@ -44,13 +40,10 @@ def weather(city):
         temp = random.randint(20, 35)
         return f"Weather in {city.title()}: {temp}°C, Partly Cloudy"
 
-def summarize_text(text):
 
-    prompt = f"""
-    Summarize the following text in 2-3 sentences.
-    Text:
-    {text}
-    """
+# Summary
+def summarize_text(text):
+    prompt = f"Summarize this in 2-3 sentences:\n{text}"
 
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
